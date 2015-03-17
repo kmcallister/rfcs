@@ -5,7 +5,7 @@
 
 # Summary
 
-Allow an anonymous `impl { ... }` for grouping items without introducing a module.
+Provide the syntax `in { ... }` for grouping items without introducing a module.
 
 # Motivation
 
@@ -25,8 +25,7 @@ fn quux() { ... }
 With the new syntax, we can eliminate the duplication of `cfg` directives:
 
 ```rust
-#[cfg(target_os = "windows")]
-impl {
+#[cfg(target_os = "windows")] in {
     mod bar;
 
     pub use bar::Baz;
@@ -45,7 +44,7 @@ Syntax extensions can similarly use this to process a set of items as a unit.
 For example I could rework [dynamodule][] to accept
 
 ```rust
-#[class] impl {
+#[class] in {
     struct Bicycle(&'static str);
     type is_a = Vehicle;
 
@@ -60,15 +59,15 @@ For example I could rework [dynamodule][] to accept
 ```
 
 Instead of digesting a whole function as token trees, we let libsyntax parse
-the `impl { ... }` normally, then fix up the AST at a higher level.
+the items normally, then fix up the AST at a higher level.
 (Naturally, this is only doable with procedural macros at the moment.)
 
 [dynamodule]: https://github.com/kmcallister/dynamodule#overview
 
 # Detailed design
 
-`impl { ... }` just provides a unit of grouping for `cfg`, syntax extensions,
-and similar purposes.  The items inside `impl { ... }` behave in every respect
+`in { ... }` just provides a unit of grouping for `cfg`, syntax extensions,
+and similar purposes.  The items inside `in { ... }` behave in every respect
 as though they were defined in the enclosing scope.
 
 (Of course, syntax extensions can perform arbitrary modifications to the AST.
@@ -79,8 +78,7 @@ The decision to support attributes besides `#[cfg]` can be made in the future
 on a case-by-cases basis.  With this PR alone,
 
 ```rust
-#[derive(Clone)]
-impl {
+#[derive(Clone)] in {
     struct Foo;
     struct Bar;
 }
@@ -109,7 +107,7 @@ The only other built-in attribute I think we may want to support is
 
 ```rust
 /// doc comment
-impl {
+in {
     ...
 }
 ```
@@ -122,7 +120,7 @@ change.
 
 # Drawbacks
 
-Complexity blah blah.  The syntax `impl { ... }` is so non-specific that it's
+Complexity blah blah.  The syntax `in { ... }` is so non-specific that it's
 hard to imagine using it for anything else.
 
 # Alternatives
