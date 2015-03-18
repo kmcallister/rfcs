@@ -74,36 +74,24 @@ as though they were defined in the enclosing scope.
 The `type is_a` above would *not* be defined in the enclosing scope, because
 the syntax extension interprets it specially.)
 
-The decision to support attributes besides `#[cfg]` can be made in the future
-on a case-by-cases basis.  With this PR alone,
+The following built-in attributes are allowed on `in`:
 
-```rust
-#[derive(Clone)] in {
-    struct Foo;
-    struct Bar;
-}
+```text
+cfg cfg_attr allow warn deny forbid derive
 ```
 
-is no more legal than today's
+These attributes are all "distributive": the meaning is the same as applying
+the attribute to each item inside the group. This can be a recursive process
+when `in` is nested.
 
-```rust
-#[derive(Clone)]
-impl S { }
-```
+# Drawbacks
 
-After a quick look through the [attributes list][], my conclusion is that most
-attributes, if they make sense at all in this context, would be "distributive".
-That is, they would be shorthand for applying the same attribute to each item
-within.
+Complexity blah blah.  The syntax `in { ... }` is so non-specific that it's
+hard to imagine using it for anything else.
 
-In general, I don't think we should allow this shorthand, as it changes the
-meaning of items in a rather implicit / non-local way.  For the lint attributes
-in particular (`allow`, `warn`, `deny`, and `forbid`), the distributive
-interpretation seems useful and un-problematic.  This RFC adopts such an
-interpretation of just these four attributes, alongside the usual meaning of
-`cfg`.
+# Alternatives
 
-The only other built-in attribute I think we may want to support is
+We could allow
 
 ```rust
 /// doc comment
@@ -112,18 +100,7 @@ in {
 }
 ```
 
-to designate "sections" in rustdoc output.  But I don't find this very
-compelling at the moment, and I don't include it as part of the proposed
-change.
-
-[attributes list]: http://doc.rust-lang.org/reference.html#attributes
-
-# Drawbacks
-
-Complexity blah blah.  The syntax `in { ... }` is so non-specific that it's
-hard to imagine using it for anything else.
-
-# Alternatives
+to designate "sections" in rustdoc output. That would be a future RFC.
 
 Item grouping, at least for the purposes of `cfg` stripping, could be a syntax
 extension.  The code using it would be (in my opinion) less clear, and it would
